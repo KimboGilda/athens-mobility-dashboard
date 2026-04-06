@@ -107,3 +107,6 @@ export const M3:transitLine = {
   stations: M3Stations,
   routeLine: M3Stations.map(st => [st.latitude, st.longitude])
 }
+
+export const metroLines: transitLine[] = [M1, M2, M3];
+
