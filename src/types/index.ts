@@ -1,0 +1,21 @@
+export interface transitStop {
+  id: string;
+  name:string;
+  lon:number;
+  lat:number;
+  transportType:string;
+  transitLines:transitLine[];
+}
+
+
+export interface transitLine {
+  id:string;
+  name:string;
+  color:string;
+  transportType:string;
+  routeLine:[number,number][];
+}
+
+export type ActiveLayer = 'bus' | 'metro' | 'tram' | 'all';
+
+
