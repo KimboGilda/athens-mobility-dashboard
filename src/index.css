@@ -17,3 +17,37 @@ body {
   background: #080c14;
   font-family: 'DM Sans', sans-serif;
 }
+
+.leaflet-control-layers {
+  background: #0d1422 !important;
+  border: 1px solid #1e2d44 !important;
+  border-radius: 8px !important;
+  color: #c8cdd8 !important;
+}
+
+.leaflet-control-layers-toggle {
+  background-color: #0d1422 !important;
+}
+
+.leaflet-control-layers label {
+  color: #c8cdd8 !important;
+  font-family: 'Space Mono', monospace !important;
+  font-size: 11px !important;
+  letter-spacing: 0.05em !important;
+}
+
+.leaflet-control-layers-separator {
+  border-color: #1e2d44 !important;
+}
+
+/* Zoom control dark theme */
+.leaflet-control-zoom a {
+  background: #0d1422 !important;
+  border-color: #1e2d44 !important;
+  color: #c8cdd8 !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background: #162030 !important;
+  color: #2dd4a4 !important;
+}

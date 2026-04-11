@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import L, { latLng } from 'leaflet';
+import L from 'leaflet';
 import type { ActiveLayer } from '../types';
 import { metroLines } from '../data/metro-lines';
 import { useBusStops } from '../stores/bus-store';
@@ -7,13 +7,16 @@ import 'leaflet.markercluster';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
-const Map = ({ activeLayer }: { activeLayer: ActiveLayer }) => {
+const Map = ({ activeLayer, onBasemapChange }: {
+  activeLayer: ActiveLayer
+  onBasemapChange: (isDark: boolean) => void
+}) => {
+
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
-  const {stops, loading, error} = useBusStops();
+  const { stops, loading } = useBusStops();
   const metroLayerGroup = useRef<L.LayerGroup | null>(null);
   const busLayerGroup = useRef<L.LayerGroup | null>(null);
-
 
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
@@ -28,34 +31,38 @@ const Map = ({ activeLayer }: { activeLayer: ActiveLayer }) => {
     L.control.zoom({ position: 'topright' }).addTo(map);
 
     const darkMap = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
-      attribution: '© OpenStreetMap © CARTO',});
+      attribution: '© OpenStreetMap © CARTO',
+    })
 
     const osmMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
-    });
+    })
 
-    osmMap.addTo(map);
+    osmMap.addTo(map)
 
-    metroLayerGroup.current = L.layerGroup().addTo(map);
-    busLayerGroup.current = L.layerGroup().addTo(map);
+    metroLayerGroup.current = L.layerGroup().addTo(map)
+    busLayerGroup.current = L.layerGroup().addTo(map)
 
-    // basemap switcher
     const baseMaps = {
       'Dark': darkMap,
       'OpenStreetMap': osmMap,
-    };
+    }
 
     const overlays = {
       'Metro Lines': metroLayerGroup.current,
       'Bus Stops': busLayerGroup.current,
     }
 
-    L.control.layers(baseMaps, overlays).addTo(map);
+    L.control.layers(baseMaps, overlays).addTo(map)
 
-    mapInstance.current = map;
+    mapInstance.current = map
+
+    // isDark is true when Dark is selected
+    map.on('baselayerchange', (e: L.LayersControlEvent) => {
+      onBasemapChange(e.name === 'Dark')
+    })
   }, [])
 
-  // Metro lines
   useEffect(() => {
     if (!mapInstance.current) return
 
@@ -63,7 +70,7 @@ const Map = ({ activeLayer }: { activeLayer: ActiveLayer }) => {
       L.polyline(line.routeLine as L.LatLngExpression[], {
         color: line.color,
         weight: 4,
-      }).addTo(metroLayerGroup.current!);
+      }).addTo(metroLayerGroup.current!)
 
       line.stations.forEach(station => {
         L.circleMarker([station.latitude, station.longitude], {
@@ -74,27 +81,22 @@ const Map = ({ activeLayer }: { activeLayer: ActiveLayer }) => {
           weight: 1.5,
         })
         .bindPopup(`
-          <div class="font-sans bg-white text-gray-800 border border-gray-200 px-3 py-2 rounded-lg shadow-md">
-            <p class="text-[11px] font-semibold tracking-wide uppercase mb-1" style="color: ${line.color}">
-              ${line.name}
-            </p>
-            <p class="text-sm font-medium text-gray-900">
-              ${station.name}
-            </p>
+          <div style="font-family:monospace;background:#0d1422;color:#c8cdd8;border:1px solid #1e2d44;padding:10px 14px;border-radius:6px">
+            <p style="color:${line.color};font-size:11px;letter-spacing:0.1em;margin-bottom:6px">${line.name}</p>
+            <p style="font-size:13px;color:#eef0f5">${station.name}</p>
           </div>
         `)
         .addTo(metroLayerGroup.current!)
       })
     })
-  }, [metroLines]);
+  }, [])
 
-  // Bus stops
   useEffect(() => {
-    if (!mapInstance.current) return;
+    if (!mapInstance.current || loading) return
 
-    const clusterGroup = L.markerClusterGroup();
+    const clusterGroup = L.markerClusterGroup()
 
-     stops.forEach(st => {
+    stops.forEach(st => {
       L.circleMarker([st.lat, st.lon], {
         radius: 3,
         fillColor: '#9030f0',
@@ -103,16 +105,14 @@ const Map = ({ activeLayer }: { activeLayer: ActiveLayer }) => {
         weight: 1,
       })
       .bindPopup(`
-          <div class="font-sans bg-white text-gray-800 border border-gray-200 px-3 py-2 rounded-lg shadow-md">
-            <p class="text-sm font-medium text-gray-900">
-              ${st.name}
-            </p>
-          </div>
-        `)
+        <div style="font-family:monospace;background:#0d1422;color:#c8cdd8;border:1px solid #1e2d44;padding:10px 14px;border-radius:6px">
+          <p style="font-size:13px;color:#eef0f5">${st.name}</p>
+        </div>
+      `)
       .addTo(clusterGroup)
-     })
+    })
 
-     clusterGroup.addTo(busLayerGroup.current!);
+    clusterGroup.addTo(busLayerGroup.current!)
   }, [stops, loading])
 
   return (

@@ -5,10 +5,28 @@ import 'leaflet/dist/leaflet.css'
 
 function App() {
   const [activeLayer, setActiveLayer] = useState<ActiveLayer>('all')
+  const [isDarkMap, setIsDarkMap] = useState<boolean>(false)
 
   return (
-    <div className="w-screen h-screen bg-[#080c14]">
-      <Map activeLayer={activeLayer} />
+    <div className="relative w-screen h-screen bg-[#080c14]">
+
+      <div className="absolute top-6 left-6 z-[1000] pointer-events-none">
+        <p className={`font-mono font-bold text-[12px] tracking-[0.16em] uppercase mb-1 ${
+          isDarkMap ? 'text-[#2dd4a4]' : 'text-[#1f0a8e]'
+        }`}>
+        Athens
+        </p>
+        <h1 className={`font-['Syne'] text-[21px] font-bold leading-tight ${
+          isDarkMap ? 'text-[#eef0f5]' : 'text-[#080c14]'
+        }`}>
+          Urban Mobility Dashboard
+        </h1>
+      </div>
+
+      <Map
+        activeLayer={activeLayer}
+        onBasemapChange={(isDark) => setIsDarkMap(isDark)}
+      />
     </div>
   )
 }
