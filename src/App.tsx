@@ -6,7 +6,7 @@ import 'leaflet/dist/leaflet.css'
 import { useBusStops } from './stores/bus-store'
 
 function App() {
-  const [activeLayer, setActiveLayer] = useState<ActiveLayer>('all')
+  const [activeLayer] = useState<ActiveLayer>('all');
   const [isDarkMap, setIsDarkMap] = useState<boolean>(false);
   const {stops} = useBusStops();
 

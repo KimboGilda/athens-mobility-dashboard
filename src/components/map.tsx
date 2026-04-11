@@ -7,7 +7,7 @@ import 'leaflet.markercluster';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
-const Map = ({ activeLayer, onBasemapChange }: {
+const Map = ({ activeLayer: _activeLayer, onBasemapChange }: {
   activeLayer: ActiveLayer
   onBasemapChange: (isDark: boolean) => void
 }) => {
