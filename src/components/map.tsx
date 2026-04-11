@@ -3,6 +3,9 @@ import L, { latLng } from 'leaflet';
 import type { ActiveLayer } from '../types';
 import { metroLines } from '../data/metro-lines';
 import { useBusStops } from '../stores/bus-store';
+import 'leaflet.markercluster';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
 const Map = ({ activeLayer }: { activeLayer: ActiveLayer }) => {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -64,6 +67,9 @@ const Map = ({ activeLayer }: { activeLayer: ActiveLayer }) => {
   // Bus stops
   useEffect(() => {
     if (!mapInstance.current) return;
+
+    const clusterGroup = L.markerClusterGroup();
+
      stops.forEach(st => {
       L.circleMarker([st.lat, st.lon], {
         radius: 3,
@@ -79,8 +85,10 @@ const Map = ({ activeLayer }: { activeLayer: ActiveLayer }) => {
             </p>
           </div>
         `)
-      .addTo(mapInstance.current!)
+      .addTo(clusterGroup)
      })
+
+     clusterGroup.addTo(mapInstance.current!);
   }, [stops, loading])
 
   return (
