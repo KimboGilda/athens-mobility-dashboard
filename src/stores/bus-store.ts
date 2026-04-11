@@ -9,12 +9,17 @@ const query = `
   out;
 `
 
+let cachedStops: transitStop[] | null = null
+
 export const useBusStops = () => {
   const [stops, setStops] = useState<transitStop[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+
+    if (cachedStops) return;
+
     const fetchStops = async () => {
       try {
         const res = await fetch(OVERPASS_URL, {
@@ -33,6 +38,7 @@ export const useBusStops = () => {
           transitLines:  [],
         }))
 
+        cachedStops = parsed;
         setStops(parsed)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error')

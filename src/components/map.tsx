@@ -1,11 +1,13 @@
 import { useRef, useEffect } from 'react';
-import L from 'leaflet';
+import L, { latLng } from 'leaflet';
 import type { ActiveLayer } from '../types';
 import { metroLines } from '../data/metro-lines';
+import { useBusStops } from '../stores/bus-store';
 
 const Map = ({ activeLayer }: { activeLayer: ActiveLayer }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
+  const {stops, loading, error} = useBusStops();
 
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
@@ -26,6 +28,7 @@ const Map = ({ activeLayer }: { activeLayer: ActiveLayer }) => {
     mapInstance.current = map
   }, [])
 
+  // Metro lines
   useEffect(() => {
     if (!mapInstance.current) return
 
@@ -56,7 +59,29 @@ const Map = ({ activeLayer }: { activeLayer: ActiveLayer }) => {
         .addTo(mapInstance.current!)
       })
     })
-  }, [metroLines])
+  }, [metroLines]);
+
+  // Bus stops
+  useEffect(() => {
+    if (!mapInstance.current) return;
+     stops.forEach(st => {
+      L.circleMarker([st.lat, st.lon], {
+        radius: 3,
+        fillColor: '#9030f0',
+        color: '#5a30f0',
+        fillOpacity: 0.8,
+        weight: 1,
+      })
+      .bindPopup(`
+          <div class="font-sans bg-white text-gray-800 border border-gray-200 px-3 py-2 rounded-lg shadow-md">
+            <p class="text-sm font-medium text-gray-900">
+              ${st.name}
+            </p>
+          </div>
+        `)
+      .addTo(mapInstance.current!)
+     })
+  }, [stops, loading])
 
   return (
     <div ref={mapRef} className='w-full h-full' />
