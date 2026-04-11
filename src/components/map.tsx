@@ -11,6 +11,9 @@ const Map = ({ activeLayer }: { activeLayer: ActiveLayer }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
   const {stops, loading, error} = useBusStops();
+  const metroLayerGroup = useRef<L.LayerGroup | null>(null);
+  const busLayerGroup = useRef<L.LayerGroup | null>(null);
+
 
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
@@ -24,11 +27,32 @@ const Map = ({ activeLayer }: { activeLayer: ActiveLayer }) => {
 
     L.control.zoom({ position: 'topright' }).addTo(map);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+    const darkMap = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+      attribution: '© OpenStreetMap © CARTO',});
 
-    mapInstance.current = map
+    const osmMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    });
+
+    osmMap.addTo(map);
+
+    metroLayerGroup.current = L.layerGroup().addTo(map);
+    busLayerGroup.current = L.layerGroup().addTo(map);
+
+    // basemap switcher
+    const baseMaps = {
+      'Dark': darkMap,
+      'OpenStreetMap': osmMap,
+    };
+
+    const overlays = {
+      'Metro Lines': metroLayerGroup.current,
+      'Bus Stops': busLayerGroup.current,
+    }
+
+    L.control.layers(baseMaps, overlays).addTo(map);
+
+    mapInstance.current = map;
   }, [])
 
   // Metro lines
@@ -39,7 +63,7 @@ const Map = ({ activeLayer }: { activeLayer: ActiveLayer }) => {
       L.polyline(line.routeLine as L.LatLngExpression[], {
         color: line.color,
         weight: 4,
-      }).addTo(mapInstance.current!)
+      }).addTo(metroLayerGroup.current!);
 
       line.stations.forEach(station => {
         L.circleMarker([station.latitude, station.longitude], {
@@ -59,7 +83,7 @@ const Map = ({ activeLayer }: { activeLayer: ActiveLayer }) => {
             </p>
           </div>
         `)
-        .addTo(mapInstance.current!)
+        .addTo(metroLayerGroup.current!)
       })
     })
   }, [metroLines]);
@@ -88,7 +112,7 @@ const Map = ({ activeLayer }: { activeLayer: ActiveLayer }) => {
       .addTo(clusterGroup)
      })
 
-     clusterGroup.addTo(mapInstance.current!);
+     clusterGroup.addTo(busLayerGroup.current!);
   }, [stops, loading])
 
   return (
