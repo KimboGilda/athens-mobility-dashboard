@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import Map from './components/map'
+import StatsBar from './components/stats-bar'
 import type { ActiveLayer } from './types'
 import 'leaflet/dist/leaflet.css'
+import { useBusStops } from './stores/bus-store'
 
 function App() {
   const [activeLayer, setActiveLayer] = useState<ActiveLayer>('all')
-  const [isDarkMap, setIsDarkMap] = useState<boolean>(false)
+  const [isDarkMap, setIsDarkMap] = useState<boolean>(false);
+  const {stops} = useBusStops();
 
   return (
     <div className="relative w-screen h-screen bg-[#080c14]">
@@ -27,6 +30,9 @@ function App() {
         activeLayer={activeLayer}
         onBasemapChange={(isDark) => setIsDarkMap(isDark)}
       />
+      <StatsBar
+       isDarkMap={false}
+       stops={stops.length}/>
     </div>
   )
 }
